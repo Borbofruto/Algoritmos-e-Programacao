@@ -82,25 +82,46 @@ class RegisterProduct:
                 else:
                     print("ERRO: Digite um número válido para a quantidade.")
 
+    @staticmethod
+    def discount(quantity, price):
+        if quantity < 5:
+            rate = 0
+        elif quantity >= 5 and quantity <= 9:
+            rate = 0.05
+        elif quantity >= 10 and quantity <= 19:
+            rate = 0.1
+        if quantity > 20:
+            rate = 0.15
+
+        gross_value = (quantity * price)
+        discount = gross_value - (gross_value * rate)
+
+        return discount
+
     @classmethod
     def create_product(cls):
-        return {
+        product = {
             "code": cls.code(),
             "description": cls.description(),
             "price": cls.price(),
-            "quantity": cls.quantity()
+            "quantity": cls.quantity(),
         }
+        product["discount"] = cls.discount(product["quantity"], product["price"])
+
+        return product
 
 def checkout_manager(shopping_cart):
     itens_comprados = f"{', '.join([dictionary['description'] for dictionary in shopping_cart])}"
-    quantidade_total_pecas = f"{sum([dictionary['quantity'] for dictionary in shopping_cart])}"
-    total_bruto = f"{sum([dictionary['price'] for dictionary in shopping_cart])}"
+    quantidade_total_pecas = sum([dictionary['quantity'] for dictionary in shopping_cart])
+    total_bruto = sum([dictionary['price'] for dictionary in shopping_cart])
+    desconto = sum([dictionary['discount'] for dictionary in shopping_cart])
     
     print(f"""
     ==================== EXTRATO FISCAL ====================
     Itens Comprados: {itens_comprados}
     Quantidade Total de Peças: {quantidade_total_pecas} unidades
-    Total Bruto: R${total_bruto}
+    Total Bruto: R${total_bruto:.2f}
+    Desconto Total: R${desconto}
     Preço Médio por Peça: R${total_bruto / itens_comprados:.2f}
     """)
     
