@@ -83,18 +83,17 @@ class RegisterProduct:
                     print("ERRO: Digite um número válido para a quantidade.")
 
     @staticmethod
-    def discount(quantity, price):
+    def discount(quantity):
         if quantity < 5:
             rate = 0
         elif quantity >= 5 and quantity <= 9:
             rate = 0.05
         elif quantity >= 10 and quantity <= 19:
             rate = 0.1
-        if quantity > 20:
+        elif quantity > 20:
             rate = 0.15
 
-        gross_value = (quantity * price)
-        discount = gross_value - (gross_value * rate)
+        discount = rate
 
         return discount
 
@@ -106,23 +105,32 @@ class RegisterProduct:
             "price": cls.price(),
             "quantity": cls.quantity(),
         }
-        product["discount"] = cls.discount(product["quantity"], product["price"])
+        gross_value = product['price'] * product['quantity']
+        discount_rate = cls.discount(product["quantity"])
+
+        product["discount"] = gross_value * discount_rate
+
+        print(f"Subtotal Bruto: R$ {gross_value:.2f} | Desconto ({discount_rate}%): R$ {product['discount']} | Líquido: R$ {(product['price'] * product['quantity']) - product['discount']:.2f}")
 
         return product
 
-def checkout_manager(shopping_cart):
+def checkout_manager(shopping_cart, user_name):
     itens_comprados = f"{', '.join([dictionary['description'] for dictionary in shopping_cart])}"
     quantidade_total_pecas = sum([dictionary['quantity'] for dictionary in shopping_cart])
-    total_bruto = sum([dictionary['price'] for dictionary in shopping_cart])
+    total_bruto = sum([dictionary['price'] for dictionary in shopping_cart]) * quantidade_total_pecas
     desconto = sum([dictionary['discount'] for dictionary in shopping_cart])
+    total_liquido = total_bruto - desconto
+    preco_medio_por_peca = total_liquido / quantidade_total_pecas
     
     print(f"""
     ==================== EXTRATO FISCAL ====================
     Itens Comprados: {itens_comprados}
     Quantidade Total de Peças: {quantidade_total_pecas} unidades
     Total Bruto: R${total_bruto:.2f}
-    Desconto Total: R${desconto}
-    Preço Médio por Peça: R${total_bruto / itens_comprados:.2f}
+    Desconto Total: R${desconto:.2f}
+    VALOR FINAL A PAGAR: R${total_liquido:.2f}
+    Preço Médio por Peça: R${preco_medio_por_peca:.2f}
+    Código do produto
     """)
     
 carrinho = []
@@ -130,12 +138,14 @@ carrinho = []
 carrinho.append(RegisterProduct.create_product())
 
 while True:
-    user_input = input("Deseja adicionar outro produto? (S/N): ").strip().upper()
-    if user_input == "S":
+    pedido_novo_produto = input("Deseja adicionar outro produto? (S/N): ").strip().upper()
+    if pedido_novo_produto == "S":
         carrinho.append(RegisterProduct.create_product())
-    elif user_input == "N":
+    elif pedido_novo_produto == "N":
+        user_name = input("Qual seu nome? ").strip().upper()
         break
     else:
         print('Opção inválida, digite apenas "S" ou "N"')
 
-checkout_manager(carrinho)
+    
+checkout_manager(carrinho, user_name)
