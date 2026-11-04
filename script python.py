@@ -8,34 +8,25 @@ class ValidProduct:
 
     @staticmethod
     def description(user_input):
-        if not user_input == "":
+        if user_input != "":
             return True
         else:
             return False
 
     @staticmethod
     def price(user_input):
-        try:
-            float(user_input)
-        except ValueError:
-            return False
+        if 0 < user_input < float("inf"):
+            return True
         else:
-            if float(user_input) > 0:
-                return True
-            else:
-                return False
+            return False
 
     @staticmethod
     def quantity(user_input):
-            try:
-                int(user_input)
-            except ValueError:
-                return False
-            else:
-                if int(user_input) > 0:
-                    return True
-                else:
-                    return False
+        if user_input > 0:
+            return True
+        else:
+            return False
+
 
 class RegisterProduct:
     @staticmethod
@@ -52,7 +43,7 @@ class RegisterProduct:
     @staticmethod
     def description():
         while True:
-            user_input =  input("Digite o nome do produto: ").strip().title()
+            user_input = input("Digite o nome do produto: ").strip().title()
 
             if ValidProduct.description(user_input):
                 description = user_input
@@ -63,24 +54,32 @@ class RegisterProduct:
     @staticmethod
     def price():
         while True:
-            user_input = input("Digite o preço unitário (R$): ")
+            user_input = input("Digite o preço unitário (R$): ").strip()
 
-            if ValidProduct.price(user_input):
+            try:
                 price = float(user_input)
-                return price
-            else:
+            except ValueError:
                 print("ERRO: Digite um número válido para o preço.")
+            else:
+                if ValidProduct.price(price):
+                    return price
+                else:
+                    print("ERRO: Digite um número válido para o preço.")
 
     @staticmethod
     def quantity():
-            while True:
-                user_input = input("Digite a quantidade de unidades do produto: ")
+        while True:
+            user_input = input("Digite a quantidade de unidades do produto: ").strip()
 
-                if ValidProduct.quantity(user_input):
-                    quantity = int(user_input)
-                    return quantity            
+            try:
+                quantity = int(user_input)
+            except ValueError:
+                print("ERRO: Digite um número inteiro positivo para a quantidade.")
+            else:
+                if ValidProduct.quantity(quantity):
+                    return quantity
                 else:
-                    print("ERRO: Digite um número válido para a quantidade.")
+                    print("ERRO: Digite um número inteiro positivo para a quantidade.")
 
     @staticmethod
     def discount(quantity):
@@ -89,12 +88,11 @@ class RegisterProduct:
         elif quantity >= 5 and quantity <= 9:
             rate = 0.05
         elif quantity >= 10 and quantity <= 19:
-            rate = 0.1
-        elif quantity > 20:
+            rate = 0.10
+        else:
             rate = 0.15
 
         discount = rate
-
         return discount
 
     @classmethod
@@ -105,47 +103,79 @@ class RegisterProduct:
             "price": cls.price(),
             "quantity": cls.quantity(),
         }
-        gross_value = product['price'] * product['quantity']
+
+        gross_value = product["price"] * product["quantity"]
         discount_rate = cls.discount(product["quantity"])
+        discount_value = gross_value * discount_rate
+        net_value = gross_value - discount_value
 
-        product["discount"] = gross_value * discount_rate
+        product["discount"] = discount_value
 
-        print(f"Subtotal Bruto: R$ {gross_value:.2f} | Desconto ({discount_rate}%): R$ {product['discount']} | Líquido: R$ {(product['price'] * product['quantity']) - product['discount']:.2f}")
+        print(
+            f"Subtotal Bruto: R$ {gross_value:.2f} | "
+            f"Desconto ({discount_rate * 100:.0f}%): R$ {discount_value:.2f} | "
+            f"Líquido: R$ {net_value:.2f}"
+        )
 
         return product
 
-def checkout_manager(shopping_cart, user_name):
-    itens_comprados = f"{', '.join([dictionary['description'] for dictionary in shopping_cart])}"
-    quantidade_total_pecas = sum([dictionary['quantity'] for dictionary in shopping_cart])
-    total_bruto = sum([dictionary['price'] for dictionary in shopping_cart]) * quantidade_total_pecas
-    desconto = sum([dictionary['discount'] for dictionary in shopping_cart])
-    total_liquido = total_bruto - desconto
-    preco_medio_por_peca = total_liquido / quantidade_total_pecas
-    
-    print(f"""
-    ==================== EXTRATO FISCAL ====================
-    Itens Comprados: {itens_comprados}
-    Quantidade Total de Peças: {quantidade_total_pecas} unidades
-    Total Bruto: R${total_bruto:.2f}
-    Desconto Total: R${desconto:.2f}
-    VALOR FINAL A PAGAR: R${total_liquido:.2f}
-    Preço Médio por Peça: R${preco_medio_por_peca:.2f}
-    Código do produto
-    """)
-    
-carrinho = []
 
+def checkout_manager(shopping_cart, user_name):
+    itens_comprados = ", ".join([product["description"] for product in shopping_cart])
+    quantidade_total_pecas = sum([product["quantity"] for product in shopping_cart])
+    total_bruto = sum([product["price"] * product["quantity"] for product in shopping_cart])
+    desconto = sum([product["discount"] for product in shopping_cart])
+    total_liquido = total_bruto - desconto
+
+    try:
+        preco_medio_por_peca = total_liquido / quantidade_total_pecas
+    except ZeroDivisionError:
+        preco_medio_por_peca = 0.0
+
+    total_vogais = 0
+    for caracter in itens_comprados.lower():
+        if caracter in "aeiouáàâãéêíóôõúü":
+            total_vogais += 1
+
+    tres_primeiras_letras = user_name[:3].upper()
+    letras_invertidas = tres_primeiras_letras[::-1]
+    tamanho_nome = len(user_name.replace(" ", ""))
+    valor_inteiro = int(total_liquido)
+    codigo_fidelidade = f"{letras_invertidas}{tamanho_nome}-{valor_inteiro}"
+
+    print(f"""
+==================== EXTRATO FISCAL ====================
+Itens Comprados: {itens_comprados}
+Quantidade Total de Peças: {quantidade_total_pecas} unidades
+Total Bruto: R$ {total_bruto:.2f}
+Desconto Total: R$ {desconto:.2f}
+VALOR FINAL A PAGAR: R$ {total_liquido:.2f}
+Preço Médio por Peça: R$ {preco_medio_por_peca:.2f}
+Total de Vogais nos Nomes: {total_vogais} vogais
+Nome do Cliente: {user_name}
+Código de Fidelidade Gerado: {codigo_fidelidade}
+=======================================================
+""")
+
+
+print("=== MERCADOTECH EXPRESS - CAIXA INTELIGENTE ===")
+carrinho = []
 carrinho.append(RegisterProduct.create_product())
 
 while True:
     pedido_novo_produto = input("Deseja adicionar outro produto? (S/N): ").strip().upper()
+
     if pedido_novo_produto == "S":
         carrinho.append(RegisterProduct.create_product())
     elif pedido_novo_produto == "N":
-        user_name = input("Qual seu nome? ").strip().upper()
+        while True:
+            user_name = input("Qual seu nome? ").strip().title()
+            if len(user_name) >= 3:
+                break
+            else:
+                print("Nome inválido. Digite pelo menos 3 caracteres.")
         break
     else:
         print('Opção inválida, digite apenas "S" ou "N"')
 
-    
 checkout_manager(carrinho, user_name)
