@@ -95,6 +95,10 @@ class RegisterProduct:
     
 carrinho = []
 
-carrinho.append(RegisterProduct.create_product())
+while True:
+    carrinho.append(RegisterProduct.create_product())
+    if input("Deseja adicionar outro produto? (S/N): ") == "N":
+        break
 
-print(f"O produto {carrinho[0]['description']}, código - {carrinho[0]['code']}, custa R${carrinho[0]['price']:.2f}, e o total de {carrinho[0]['quantity']} unidades dele é R${carrinho[0]['price'] * carrinho[0]['quantity']:.2f}")
+for produto in carrinho:
+    print(f"O produto {produto['description']}, código - {produto['code']}, custa R${produto['price']:.2f}, e o total de {produto['quantity']} unidades dele é R${produto['price'] * produto['quantity']:.2f}")
