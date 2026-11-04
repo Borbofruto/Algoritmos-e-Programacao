@@ -97,8 +97,14 @@ carrinho = []
 
 while True:
     carrinho.append(RegisterProduct.create_product())
-    if input("Deseja adicionar outro produto? (S/N): ") == "N":
+
+    user_input = input("Deseja adicionar outro produto? (S/N): ")
+    if user_input == "S":
+        continue
+    elif user_input == "N":
         break
+    else:
+        print('Opção inválida, digite apenas "S" ou "N"')
 
 for produto in carrinho:
     print(f"O produto {produto['description']}, código - {produto['code']}, custa R${produto['price']:.2f}, e o total de {produto['quantity']} unidades dele é R${produto['price'] * produto['quantity']:.2f}")
