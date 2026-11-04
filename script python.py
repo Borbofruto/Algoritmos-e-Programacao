@@ -20,7 +20,10 @@ class ValidProduct:
         except ValueError:
             return False
         else:
-            return True
+            if float(user_input) > 0:
+                return True
+            else:
+                return False
 
     @staticmethod
     def quantity(user_input):
@@ -29,7 +32,10 @@ class ValidProduct:
             except ValueError:
                 return False
             else:
-                return True
+                if int(user_input) > 0:
+                    return True
+                else:
+                    return False
 
 class RegisterProduct:
     @staticmethod
@@ -61,13 +67,9 @@ class RegisterProduct:
 
             if ValidProduct.price(user_input):
                 price = float(user_input)
-
-                if price <= 0:
-                    print('ERRO. Apenas valores maiores que "0" são válidos. Digite um valor válido.')
-                else:
-                    return price            
+                return price
             else:
-                print("Preço inválido. Digite apenas algarismos.")
+                print("ERRO: Digite um número válido para o preço.")
 
     @staticmethod
     def quantity():
@@ -76,13 +78,9 @@ class RegisterProduct:
 
                 if ValidProduct.quantity(user_input):
                     quantity = int(user_input)
-
-                    if quantity <= 0:
-                        print('ERRO. Apenas valores maiores que "0" são válidos. Digite um valor válido.')
-                    else:
-                        return quantity            
+                    return quantity            
                 else:
-                    print("Quantidade inválida. Digite apenas algarismos.")
+                    print("ERRO: Digite um número válido para a quantidade.")
 
     @classmethod
     def create_product(cls):
@@ -92,19 +90,33 @@ class RegisterProduct:
             "price": cls.price(),
             "quantity": cls.quantity()
         }
+
+def checkout_manager(shopping_cart):
+    itens_comprados = f"{', '.join([dictionary['description'] for dictionary in shopping_cart])}"
+    quantidade_total_pecas = int(f"{sum([dictionary['quantity'] for dictionary in shopping_cart])}")
+    total_bruto = float(f"{sum([dictionary['price'] for dictionary in shopping_cart])}")
+    
+    print(f"""
+    ==================== EXTRATO FISCAL ====================
+    Itens Comprados: {itens_comprados}
+    Quantidade Total de Peças: {quantidade_total_pecas} unidades
+    Total Bruto: R${total_bruto}
+    Preço Médio por Peça: R${total_bruto / quantidade_total_pecas}
+
+    ========================================================
+    """)
     
 carrinho = []
 
-while True:
-    carrinho.append(RegisterProduct.create_product())
+carrinho.append(RegisterProduct.create_product())
 
-    user_input = input("Deseja adicionar outro produto? (S/N): ")
+while True:
+    user_input = input("Deseja adicionar outro produto? (S/N): ").strip().upper()
     if user_input == "S":
-        continue
+        carrinho.append(RegisterProduct.create_product())
     elif user_input == "N":
         break
     else:
         print('Opção inválida, digite apenas "S" ou "N"')
 
-for produto in carrinho:
-    print(f"O produto {produto['description']}, código - {produto['code']}, custa R${produto['price']:.2f}, e o total de {produto['quantity']} unidades dele é R${produto['price'] * produto['quantity']:.2f}")
+checkout_manager(carrinho)
