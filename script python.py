@@ -93,17 +93,15 @@ class RegisterProduct:
 
 def checkout_manager(shopping_cart):
     itens_comprados = f"{', '.join([dictionary['description'] for dictionary in shopping_cart])}"
-    quantidade_total_pecas = int(f"{sum([dictionary['quantity'] for dictionary in shopping_cart])}")
-    total_bruto = float(f"{sum([dictionary['price'] for dictionary in shopping_cart])}")
+    quantidade_total_pecas = f"{sum([dictionary['quantity'] for dictionary in shopping_cart])}"
+    total_bruto = f"{sum([dictionary['price'] for dictionary in shopping_cart])}"
     
     print(f"""
     ==================== EXTRATO FISCAL ====================
     Itens Comprados: {itens_comprados}
     Quantidade Total de Peças: {quantidade_total_pecas} unidades
     Total Bruto: R${total_bruto}
-    Preço Médio por Peça: R${total_bruto / quantidade_total_pecas}
-
-    ========================================================
+    Preço Médio por Peça: R${total_bruto / itens_comprados:.2f}
     """)
     
 carrinho = []
